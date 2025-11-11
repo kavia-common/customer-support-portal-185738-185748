@@ -2,12 +2,36 @@
  * Lightweight API client for anonymous access.
  * Removes Authorization headers and any 401 redirect behavior.
  */
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+function resolveBaseUrl() {
+  const envUrl =
+    process.env.REACT_APP_API_URL ||
+    process.env.REACT_APP_API_BASE ||
+    process.env.REACT_APP_BACKEND_URL;
+
+  const url = envUrl && String(envUrl).trim().length ? String(envUrl).trim() : 'http://localhost:3001';
+
+  if (!envUrl) {
+    // Helpful message in preview environments if base URL wasn't injected
+    // eslint-disable-next-line no-console
+    console.warn('[api] Using default API base URL', url, '- set REACT_APP_API_URL or REACT_APP_API_BASE or REACT_APP_BACKEND_URL to override.');
+  }
+  // Remove any trailing slash to avoid double slashes when joining with path
+  return url.replace(/\/+$/, '');
+}
+
+const BASE_URL = resolveBaseUrl();
 
 // PUBLIC_INTERFACE
 export function getApiBaseUrl() {
   /** Returns the configured API base URL. */
   return BASE_URL;
+}
+
+// Join base and path safely
+function joinUrl(base, path) {
+  const p = typeof path === 'string' ? path : '';
+  if (!p) return base;
+  return `${base}${p.startsWith('/') ? p : `/${p}`}`;
 }
 
 // PUBLIC_INTERFACE
@@ -33,7 +57,7 @@ export async function apiRequest(path, { method = 'GET', headers = {}, body, for
     requestBody = JSON.stringify(body);
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(joinUrl(BASE_URL, path), {
     method,
     headers: finalHeaders,
     body: requestBody,
