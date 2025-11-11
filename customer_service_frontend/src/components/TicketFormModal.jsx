@@ -17,7 +17,16 @@ export default function TicketFormModal({ open, onClose, onCreated }) {
     setError('');
     setSubmitting(true);
     try {
-      const payload = { title, category, description };
+      // Backend schema: { title, description?, creator_id?, assignee_id? }
+      let creator_id;
+      try {
+        const parsed = JSON.parse(localStorage.getItem('user') || 'null');
+        creator_id = parsed?.id;
+      } catch {
+        creator_id = undefined;
+      }
+      const payload = { title, description };
+      if (creator_id) payload.creator_id = creator_id;
       const created = await api.post('/tickets', payload);
       onCreated && onCreated(created);
       setTitle(''); setCategory('General'); setDescription('');
