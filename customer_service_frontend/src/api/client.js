@@ -1,7 +1,7 @@
-//
-// Lightweight API client with interceptor-like behavior for fetch
-//
-
+/**
+ * Lightweight API client for anonymous access.
+ * Removes Authorization headers and any 401 redirect behavior.
+ */
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 // PUBLIC_INTERFACE
@@ -11,12 +11,11 @@ export function getApiBaseUrl() {
 }
 
 // PUBLIC_INTERFACE
-export async function apiRequest(path, { method = 'GET', headers = {}, body, auth = true, form = false } = {}) {
+export async function apiRequest(path, { method = 'GET', headers = {}, body, form = false } = {}) {
   /**
    * Perform an API HTTP request using window.fetch with JSON handling.
-   * - Attaches Authorization Bearer token from localStorage when auth = true
+   * - No Authorization headers or token storage
    * - Parses JSON response
-   * - On 401, redirects to /login
    * - Supports form-encoded posts via form=true with URLSearchParams body
    */
   const finalHeaders = {
@@ -34,29 +33,11 @@ export async function apiRequest(path, { method = 'GET', headers = {}, body, aut
     requestBody = JSON.stringify(body);
   }
 
-  if (auth) {
-    const token = localStorage.getItem('jwt');
-    if (token) {
-      finalHeaders['Authorization'] = `Bearer ${token}`;
-    }
-  }
-
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     headers: finalHeaders,
     body: requestBody,
   });
-
-  // Handle 401 globally
-  if (res.status === 401) {
-    // purge token and redirect
-    localStorage.removeItem('jwt');
-    localStorage.removeItem('user');
-    if (window.location.pathname !== '/login') {
-      window.location.replace('/login');
-    }
-    throw new Error('Unauthorized');
-  }
 
   const contentType = res.headers.get('content-type') || '';
   const data = contentType.includes('application/json') ? await res.json().catch(() => ({})) : await res.text();

@@ -8,7 +8,7 @@ beforeEach(() => {
 });
 
 // Helper to render App with a specific initial route
-function renderWithRoute(route = '/login') {
+function renderWithRoute(route = '/dashboard') {
   return render(
     <MemoryRouter initialEntries={[route]}>
       <App />
@@ -16,9 +16,9 @@ function renderWithRoute(route = '/login') {
   );
 }
 
-// Assert the Login screen renders by default (no token)
-test('renders login page heading', async () => {
-  renderWithRoute('/login');
-  const heading = await screen.findByText(/Welcome back/i);
-  expect(heading).toBeInTheDocument();
+// App should route to Dashboard and show brand header
+test('renders dashboard by default', async () => {
+  renderWithRoute('/');
+  const brand = await screen.findByText(/customer support portal/i);
+  expect(brand).toBeInTheDocument();
 });

@@ -23,8 +23,9 @@ import TicketDetail from '../components/TicketDetail';
 
 beforeEach(() => {
   jest.resetAllMocks();
+  localStorage.clear();
+  // optional: set a pseudo user to include author_id; not required
   localStorage.setItem('user', JSON.stringify({ id: 10, email: 'x@y.com' }));
-  localStorage.setItem('jwt', 'token');
 });
 
 test('loads ticket and messages', async () => {

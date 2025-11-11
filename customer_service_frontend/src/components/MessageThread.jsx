@@ -3,7 +3,7 @@ import { api } from '../api/client';
 
 // PUBLIC_INTERFACE
 export default function MessageThread({ ticketId, messages, onMessagePosted }) {
-  /** Shows messages and provides a form to post a new message */
+  /** Shows messages and provides a form to post a new message (anonymous-friendly) */
   const [content, setContent] = useState('');
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState('');
@@ -14,13 +14,14 @@ export default function MessageThread({ ticketId, messages, onMessagePosted }) {
     setPosting(true);
     setError('');
     try {
-      // Backend expects: { content, ticket_id, author_id }
-      const userRaw = localStorage.getItem('user');
-      let author_id = undefined;
+      // Backend expects: { content, ticket_id, author_id? }
+      let author_id;
       try {
-        const parsed = userRaw ? JSON.parse(userRaw) : null;
+        const parsed = JSON.parse(localStorage.getItem('user') || 'null');
         author_id = parsed?.id;
-      } catch { /* ignore parse errors */ }
+      } catch {
+        author_id = undefined;
+      }
 
       const payload = { content, ticket_id: Number(ticketId) };
       if (author_id) payload.author_id = author_id;
