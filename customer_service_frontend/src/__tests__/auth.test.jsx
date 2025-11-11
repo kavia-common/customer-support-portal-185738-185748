@@ -9,12 +9,14 @@ jest.mock('../api/auth', () => ({
 }));
 import { loginUser, registerUser } from '../api/auth';
 
+// Helper to render at a specific route
 function renderAppAt(route = '/login') {
   window.history.pushState({}, 'Test page', route);
   return render(<App />);
 }
 
 beforeEach(() => {
+  // Ensure clean state for every test
   localStorage.clear();
   jest.resetAllMocks();
 });
@@ -24,8 +26,12 @@ test('login flow success stores token and redirects', async () => {
 
   renderAppAt('/login');
 
-  fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'a@b.com' } });
-  fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'secret12' } });
+  // Wait for input fields to be present to avoid race conditions
+  const emailInput = await screen.findByLabelText(/email/i);
+  const passwordInput = await screen.findByLabelText(/password/i);
+
+  fireEvent.change(emailInput, { target: { value: 'a@b.com' } });
+  fireEvent.change(passwordInput, { target: { value: 'secret12' } });
   fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
   await waitFor(() => expect(loginUser).toHaveBeenCalled());
@@ -39,9 +45,14 @@ test('register flow success logs in if token returned', async () => {
 
   renderAppAt('/register');
 
-  fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Test' } });
-  fireEvent.change(screen.getByLabelText(/^email$/i), { target: { value: 'c@d.com' } });
-  fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'secret12' } });
+  // Use async findBy* queries for stability
+  const nameInput = await screen.findByLabelText(/name/i);
+  const emailInput = await screen.findByLabelText(/^email$/i);
+  const passwordInput = await screen.findByLabelText(/password/i);
+
+  fireEvent.change(nameInput, { target: { value: 'Test' } });
+  fireEvent.change(emailInput, { target: { value: 'c@d.com' } });
+  fireEvent.change(passwordInput, { target: { value: 'secret12' } });
   fireEvent.click(screen.getByRole('button', { name: /create account/i }));
 
   await waitFor(() => expect(registerUser).toHaveBeenCalled());

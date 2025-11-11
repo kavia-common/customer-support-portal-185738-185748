@@ -1,21 +1,18 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import App, { AuthContext } from '../App';
+import App from '../App';
 
-function ProtectedHarness({ token }) {
-  // Render App directly; it already contains BrowserRouter.
-  // Set the initial route to /dashboard to trigger ProtectedRoute.
+beforeEach(() => {
+  localStorage.clear();
+});
+
+test('redirects to /login when no token', async () => {
+  // Ensure we attempt to access a protected route
   window.history.pushState({}, 'Test', '/dashboard');
-  return (
-    <AuthContext.Provider value={{ token, user: null, login: () => {}, logout: () => {} }}>
-      <App />
-    </AuthContext.Provider>
-  );
-}
 
-test('redirects to /login when no token', () => {
-  render(<ProtectedHarness token={null} />);
-  // Login heading should be visible
-  const heading = screen.getByText(/welcome back/i);
+  render(<App />);
+
+  // Await the login headline as the redirect effect resolves
+  const heading = await screen.findByText(/welcome back/i);
   expect(heading).toBeInTheDocument();
 });

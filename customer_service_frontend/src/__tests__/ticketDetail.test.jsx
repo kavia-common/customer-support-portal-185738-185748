@@ -36,10 +36,11 @@ test('loads ticket and messages', async () => {
   render(<TicketDetail ticketId={5} />);
 
   await waitFor(() => expect(api.get).toHaveBeenCalledWith('/tickets/5'));
-  expect(screen.getByText(/loaded ticket/i)).toBeInTheDocument();
+  // Use async findBy* to assert rendered title
+  expect(await screen.findByText(/loaded ticket/i)).toBeInTheDocument();
 
   await waitFor(() => expect(messagesApi.listByTicket).toHaveBeenCalledWith(5));
-  expect(screen.getByText(/hello/i)).toBeInTheDocument();
+  expect(await screen.findByText(/hello/i)).toBeInTheDocument();
 });
 
 test('posting a message appends to UI', async () => {
@@ -59,16 +60,18 @@ test('posting a message appends to UI', async () => {
   await waitFor(() => expect(api.get).toHaveBeenCalled());
   await waitFor(() => expect(messagesApi.listByTicket).toHaveBeenCalled());
 
-  const textarea = screen.getByPlaceholderText(/write a reply/i);
+  const textarea = await screen.findByPlaceholderText(/write a reply/i);
   fireEvent.change(textarea, { target: { value: 'New message' } });
   fireEvent.click(screen.getByRole('button', { name: /send/i }));
 
-  await waitFor(() => expect(api.post).toHaveBeenCalledWith('/messages', {
-    content: 'New message',
-    ticket_id: 7,
-    author_id: 10,
-  }));
+  await waitFor(() =>
+    expect(api.post).toHaveBeenCalledWith('/messages', {
+      content: 'New message',
+      ticket_id: 7,
+      author_id: 10,
+    })
+  );
 
   // The UI prepends new message
-  await waitFor(() => expect(screen.getByText(/new message/i)).toBeInTheDocument());
+  expect(await screen.findByText(/new message/i)).toBeInTheDocument();
 });

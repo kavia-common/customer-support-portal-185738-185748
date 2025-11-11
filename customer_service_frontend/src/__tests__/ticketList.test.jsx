@@ -30,8 +30,9 @@ test('renders tickets list', async () => {
   expect(screen.getByText(/loading tickets/i)).toBeInTheDocument();
   await waitFor(() => expect(api.get).toHaveBeenCalledWith('/tickets'));
 
-  expect(screen.getByText(/first ticket/i)).toBeInTheDocument();
-  expect(screen.getByText(/second ticket/i)).toBeInTheDocument();
+  // Use async findByText to ensure elements are rendered
+  expect(await screen.findByText(/first ticket/i)).toBeInTheDocument();
+  expect(await screen.findByText(/second ticket/i)).toBeInTheDocument();
 
   // Click a ticket
   fireEvent.click(screen.getByText(/first ticket/i));
@@ -42,6 +43,6 @@ test('shows error when API fails', async () => {
   api.get.mockRejectedValue(new Error('Boom'));
   render(<TicketList onSelect={() => {}} />);
 
-  await waitFor(() => screen.getByText(/boom/i));
-  expect(screen.getByText(/boom/i)).toBeInTheDocument();
+  // Await error text reliably
+  expect(await screen.findByText(/boom/i)).toBeInTheDocument();
 });
