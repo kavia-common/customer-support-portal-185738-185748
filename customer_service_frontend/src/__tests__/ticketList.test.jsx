@@ -28,7 +28,7 @@ test('renders tickets list', async () => {
   render(<TicketList selectedId={2} onSelect={onSelect} />);
 
   expect(screen.getByText(/loading tickets/i)).toBeInTheDocument();
-  await waitFor(() => expect(api.get).toHaveBeenCalledWith('/tickets', {}));
+  await waitFor(() => expect(api.get).toHaveBeenCalledWith('/tickets'));
 
   expect(screen.getByText(/first ticket/i)).toBeInTheDocument();
   expect(screen.getByText(/second ticket/i)).toBeInTheDocument();

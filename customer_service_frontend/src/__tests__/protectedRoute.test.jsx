@@ -1,14 +1,14 @@
 import React from 'react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
 import App, { AuthContext } from '../App';
 
 function ProtectedHarness({ token }) {
+  // Render App directly; it already contains BrowserRouter.
+  // Set the initial route to /dashboard to trigger ProtectedRoute.
+  window.history.pushState({}, 'Test', '/dashboard');
   return (
     <AuthContext.Provider value={{ token, user: null, login: () => {}, logout: () => {} }}>
-      <MemoryRouter initialEntries={['/dashboard']}>
-        <App />
-      </MemoryRouter>
+      <App />
     </AuthContext.Provider>
   );
 }

@@ -35,7 +35,7 @@ test('loads ticket and messages', async () => {
 
   render(<TicketDetail ticketId={5} />);
 
-  await waitFor(() => expect(api.get).toHaveBeenCalledWith('/tickets/5', {}));
+  await waitFor(() => expect(api.get).toHaveBeenCalledWith('/tickets/5'));
   expect(screen.getByText(/loaded ticket/i)).toBeInTheDocument();
 
   await waitFor(() => expect(messagesApi.listByTicket).toHaveBeenCalledWith(5));
