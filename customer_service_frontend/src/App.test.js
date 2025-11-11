@@ -3,22 +3,22 @@ import { render, screen } from '@testing-library/react';
 import App from './App';
 import { MemoryRouter } from 'react-router-dom';
 
-// Mock BrowserRouter to use MemoryRouter in tests to control initialEntries and ensure routes mount.
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return {
-    ...actual,
-    BrowserRouter: ({ children }) => <MemoryRouter initialEntries={['/login']}>{children}</MemoryRouter>,
-  };
-});
-
 beforeEach(() => {
   localStorage.clear();
 });
 
+// Helper to render App with a specific initial route
+function renderWithRoute(route = '/login') {
+  return render(
+    <MemoryRouter initialEntries={[route]}>
+      <App />
+    </MemoryRouter>
+  );
+}
+
 // Assert the Login screen renders by default (no token)
 test('renders login page heading', async () => {
-  render(<App />);
+  renderWithRoute('/login');
   const heading = await screen.findByText(/Welcome back/i);
   expect(heading).toBeInTheDocument();
 });

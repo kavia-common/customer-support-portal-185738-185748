@@ -11,21 +11,13 @@ import { loginUser, registerUser } from '../api/auth';
 
 import { MemoryRouter } from 'react-router-dom';
 
-// Mock BrowserRouter to MemoryRouter and allow per-test route control via initialEntries
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return {
-    ...actual,
-    BrowserRouter: ({ children }) => <MemoryRouter initialEntries={['/login']}>{children}</MemoryRouter>,
-  };
-});
-
-// Helper to render at a specific route by re-mocking with route-specific initialEntries
+// Helper to render at a specific route by wrapping with MemoryRouter directly
 function renderAppAt(route = '/login') {
-  // Rewire the mock for this specific render to set desired initialEntries
-  const rrd = jest.requireMock('react-router-dom');
-  rrd.BrowserRouter = ({ children }) => <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>;
-  return render(<App />);
+  return render(
+    <MemoryRouter initialEntries={[route]}>
+      <App />
+    </MemoryRouter>
+  );
 }
 
 beforeEach(() => {
