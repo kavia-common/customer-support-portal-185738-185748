@@ -39,10 +39,16 @@ test('login flow success stores token and redirects', async () => {
   fireEvent.change(passwordInput, { target: { value: 'secret12' } });
   fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
+  // Ensure API was called
   await waitFor(() => expect(loginUser).toHaveBeenCalled());
 
-  // token persisted by App login callback (through context)
-  await waitFor(() => expect(localStorage.getItem('jwt')).toBe('abc123'));
+  // Wait for post-login UI indicator first (Dashboard visible)
+  // Using Header "Customer Support Portal" which appears on Dashboard
+  const dashboardBrand = await screen.findByText(/customer support portal/i);
+  expect(dashboardBrand).toBeInTheDocument();
+
+  // Now assert token is stored
+  expect(localStorage.getItem('jwt')).toBe('abc123');
 });
 
 test('register flow success logs in if token returned', async () => {
@@ -61,5 +67,11 @@ test('register flow success logs in if token returned', async () => {
   fireEvent.click(screen.getByRole('button', { name: /create account/i }));
 
   await waitFor(() => expect(registerUser).toHaveBeenCalled());
-  await waitFor(() => expect(localStorage.getItem('jwt')).toBe('xyz789'));
+
+  // Wait for Dashboard UI to appear after automatic login
+  const dashboardBrand = await screen.findByText(/customer support portal/i);
+  expect(dashboardBrand).toBeInTheDocument();
+
+  // Then assert token presence
+  expect(localStorage.getItem('jwt')).toBe('xyz789');
 });
