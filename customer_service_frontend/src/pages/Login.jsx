@@ -41,15 +41,33 @@ export default function Login() {
         <div className="subtitle">Sign in to your support portal</div>
         {error && <div style={{ color: 'var(--color-error)', marginTop: 8 }}>{error}</div>}
         <form onSubmit={submit} style={{ display: 'grid', gap: 10, marginTop: 12 }}>
-          <label>
+          <label htmlFor="login-email">
             <div className="subtitle">Email</div>
-            <input className="input" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
           </label>
-          <label>
+          <input
+            id="login-email"
+            className="input"
+            type="email"
+            aria-label="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+          />
+          <label htmlFor="login-password">
             <div className="subtitle">Password</div>
-            <input className="input" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
           </label>
-          <button className="btn" type="submit" disabled={submitting}>{submitting ? 'Signing in...' : 'Sign in'}</button>
+          <input
+            id="login-password"
+            className="input"
+            type="password"
+            aria-label="Password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+          />
+          <button className="btn" type="submit" disabled={submitting}>
+            {submitting ? 'Signing in...' : 'Sign in'}
+          </button>
         </form>
         <div className="subtitle" style={{ marginTop: 10 }}>
           No account? <Link to="/register">Create one</Link>

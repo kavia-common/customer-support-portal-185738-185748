@@ -45,19 +45,47 @@ export default function Register() {
         <div className="subtitle">Join the support portal</div>
         {error && <div style={{ color: 'var(--color-error)', marginTop: 8 }}>{error}</div>}
         <form onSubmit={submit} style={{ display: 'grid', gap: 10, marginTop: 12 }}>
-          <label>
+          <label htmlFor="register-name">
             <div className="subtitle">Name</div>
-            <input className="input" value={name} onChange={e => setName(e.target.value)} required />
           </label>
-          <label>
+          <input
+            id="register-name"
+            className="input"
+            aria-label="Name"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+          />
+
+          <label htmlFor="register-email">
             <div className="subtitle">Email</div>
-            <input className="input" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
           </label>
-          <label>
+          <input
+            id="register-email"
+            className="input"
+            type="email"
+            aria-label="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+          />
+
+          <label htmlFor="register-password">
             <div className="subtitle">Password</div>
-            <input className="input" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
           </label>
-          <button className="btn" type="submit" disabled={submitting}>{submitting ? 'Creating...' : 'Create account'}</button>
+          <input
+            id="register-password"
+            className="input"
+            type="password"
+            aria-label="Password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+          />
+
+          <button className="btn" type="submit" disabled={submitting}>
+            {submitting ? 'Creating...' : 'Create account'}
+          </button>
         </form>
         <div className="subtitle" style={{ marginTop: 10 }}>
           Have an account? <Link to="/login">Sign in</Link>
