@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { api } from '../api/client';
+import { api, messagesApi } from '../api/client';
 import MessageThread from './MessageThread';
 
 // PUBLIC_INTERFACE
@@ -25,7 +25,7 @@ export default function TicketDetail({ ticketId, fallbackTicket }) {
   async function loadMessages() {
     if (!ticketId) return;
     try {
-      const res = await api.get(`/tickets/${ticketId}/messages`);
+      const res = await messagesApi.listByTicket(ticketId);
       setMessages(Array.isArray(res) ? res : (res.items || res.messages || []));
     } catch {
       setMessages([]);

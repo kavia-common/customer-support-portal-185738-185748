@@ -14,8 +14,18 @@ export default function MessageThread({ ticketId, messages, onMessagePosted }) {
     setPosting(true);
     setError('');
     try {
-      const payload = { content };
-      const created = await api.post(`/tickets/${ticketId}/messages`, payload);
+      // Backend expects: { content, ticket_id, author_id }
+      const userRaw = localStorage.getItem('user');
+      let author_id = undefined;
+      try {
+        const parsed = userRaw ? JSON.parse(userRaw) : null;
+        author_id = parsed?.id;
+      } catch { /* ignore parse errors */ }
+
+      const payload = { content, ticket_id: Number(ticketId) };
+      if (author_id) payload.author_id = author_id;
+
+      const created = await api.post('/messages', payload);
       onMessagePosted && onMessagePosted(created);
       setContent('');
     } catch (err) {
@@ -31,7 +41,7 @@ export default function MessageThread({ ticketId, messages, onMessagePosted }) {
         {(messages || []).map((m, idx) => (
           <div key={m.id || idx} className="message">
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <strong>{m.author?.name || m.author || 'User'}</strong>
+              <strong>{m.author?.name || m.author || m.author_id || 'User'}</strong>
               <span className="subtitle">{new Date(m.created_at || m.timestamp || Date.now()).toLocaleString()}</span>
             </div>
             <div style={{ marginTop: 6 }}>{m.content || m.text}</div>

@@ -11,17 +11,28 @@ export function getApiBaseUrl() {
 }
 
 // PUBLIC_INTERFACE
-export async function apiRequest(path, { method = 'GET', headers = {}, body, auth = true } = {}) {
+export async function apiRequest(path, { method = 'GET', headers = {}, body, auth = true, form = false } = {}) {
   /**
    * Perform an API HTTP request using window.fetch with JSON handling.
    * - Attaches Authorization Bearer token from localStorage when auth = true
    * - Parses JSON response
    * - On 401, redirects to /login
+   * - Supports form-encoded posts via form=true with URLSearchParams body
    */
   const finalHeaders = {
-    'Content-Type': 'application/json',
     ...headers,
   };
+
+  let requestBody = undefined;
+
+  if (form) {
+    // Expect body as URLSearchParams
+    finalHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
+    requestBody = body;
+  } else if (body !== undefined) {
+    finalHeaders['Content-Type'] = 'application/json';
+    requestBody = JSON.stringify(body);
+  }
 
   if (auth) {
     const token = localStorage.getItem('jwt');
@@ -33,7 +44,7 @@ export async function apiRequest(path, { method = 'GET', headers = {}, body, aut
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     headers: finalHeaders,
-    body: body ? JSON.stringify(body) : undefined,
+    body: requestBody,
   });
 
   // Handle 401 globally
@@ -51,7 +62,7 @@ export async function apiRequest(path, { method = 'GET', headers = {}, body, aut
   const data = contentType.includes('application/json') ? await res.json().catch(() => ({})) : await res.text();
 
   if (!res.ok) {
-    const msg = (data && data.detail) || (typeof data === 'string' ? data : 'Request failed');
+    const msg = (data && (data.detail?.[0]?.msg || data.detail || data.message)) || (typeof data === 'string' ? data : 'Request failed');
     const error = new Error(msg);
     error.status = res.status;
     error.data = data;
@@ -60,6 +71,15 @@ export async function apiRequest(path, { method = 'GET', headers = {}, body, aut
 
   return data;
 }
+
+// Helper for messages API alignment with backend
+// PUBLIC_INTERFACE
+export const messagesApi = {
+  /** List messages for a ticket using backend path /messages/ticket/{ticket_id} */
+  listByTicket: (ticketId) => apiRequest(`/messages/ticket/${ticketId}`, { method: 'GET' }),
+  /** Post a message using backend path /messages with JSON body: { content, ticket_id, author_id } */
+  post: (payload) => apiRequest('/messages', { method: 'POST', body: payload }),
+};
 
 // PUBLIC_INTERFACE
 export const api = {
